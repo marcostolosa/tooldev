@@ -1,0 +1,36 @@
+#!/usr/bin/python
+'''
+Command line tool for finding distances between two locations
+gmapdist "src" "dest"
+- Anish Sujanani (asi7296)
+'''
+
+import urllib2
+import sys
+import json
+from pprint import pprint
+
+gmap_key = ''
+
+if '-h' in sys.argv:
+	print '\ngmapdist\n-h: help\nUSAGE: gmapdist "<src>" "<dest">\neg: gmapdist "21Baker St" "32 Baker Street"\n\n'
+	exit(0)
+
+elif len(sys.argv) > 3 or len(sys.argv) <= 2:
+	print 'ERROR. Specify -h for usage instructions'
+	exit(-1)
+
+src =  sys.argv[1].replace(' ', '+')
+dest = sys.argv[2].replace(' ', '+')
+
+api_url = 'https://maps.googleapis.com/maps/api/distancematrix/json?origins=%s&destinations=%s&key=%s' % (src, dest, gmap_key)
+res = json.loads(urllib2.urlopen(api_url).read())
+#pprint(res)
+print '\n*SOURCE: %s (%s)' % (res['origin_addresses'][0], sys.argv[1])
+print '*DESTINATION: %s (%s)' % (res['destination_addresses'][0], sys.argv[2])
+if 'distance' in res['rows'][0]['elements'][0]:
+	print '*DISTANCE: %s' % (res['rows'][0]['elements'][0]['distance']['text'])
+	print '*DURATION: %s\n' % (res['rows'][0]['elements'][0]['duration']['text'])
+else:
+	print '* LOCATION NOT FOUND\n'
+	exit(-1)
